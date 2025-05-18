@@ -37,7 +37,7 @@ A **Skill Tracker** application built using Spring Boot that allows users to man
 5. **Repository Layer**: Interacts with the database using JPA.
 6. **Database Layer**: Stores skill records.
 
-![System Diagram](system-diagram.png)
+![img.png](img.png)
 
 ---
 

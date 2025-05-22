@@ -3,6 +3,8 @@ package com.skillstack.skilltracker.controller;
 
 import com.skillstack.skilltracker.dto.SkillDTO;
 import com.skillstack.skilltracker.service.SkillService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -12,11 +14,13 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/v1/skills")
 @RequiredArgsConstructor
+@Tag(name = "Skill", description = "Skill management API")
 public class SkillController {
 
     private final SkillService skillService;
 
     @PostMapping
+    @Operation(summary = "Create a new skill")
     public ResponseEntity<SkillDTO> createSkill(@RequestBody SkillDTO skillDTO){
         SkillDTO created = skillService.createSkill(skillDTO);
         return ResponseEntity.ok(created);

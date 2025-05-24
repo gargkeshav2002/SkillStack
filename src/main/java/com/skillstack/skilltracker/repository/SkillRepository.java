@@ -10,4 +10,7 @@ import java.util.List;
 public interface SkillRepository extends JpaRepository<Skill, Long> {
     // Custom query methods can be defined here if needed
     List<Skill> findByCategory(String category);
+    List<Skill> findByUserId(Long userId);
+
+    List<Skill> findByCategoryAndUserId(String category, long id);
 }

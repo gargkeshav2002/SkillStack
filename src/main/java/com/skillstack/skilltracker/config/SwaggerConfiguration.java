@@ -25,8 +25,9 @@ public class SwaggerConfiguration {
                 )
                 .tags(
                         List.of(
-                                new Tag().name("Skill").description("Skill management API"),
-                                new Tag().name("Health Check").description("Health check API")
+                                new Tag().name("Public APIs").description("Creation API"),
+                                new Tag().name("User").description("User management API"),
+                                new Tag().name("Skill").description("Skill management API")
                         )
                 );
     }

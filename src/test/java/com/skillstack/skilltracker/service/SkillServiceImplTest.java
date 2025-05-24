@@ -5,6 +5,7 @@ import com.skillstack.skilltracker.dto.SkillDTO;
 import com.skillstack.skilltracker.exception.ResourceNotFoundException;
 import com.skillstack.skilltracker.mapper.SkillMapper;
 import com.skillstack.skilltracker.model.Skill;
+import com.skillstack.skilltracker.model.User;
 import com.skillstack.skilltracker.repository.SkillRepository;
 import com.skillstack.skilltracker.service.impl.SkillServiceImpl;
 import org.junit.jupiter.api.Assertions;
@@ -28,10 +29,13 @@ public class SkillServiceImplTest {
     @InjectMocks
     private SkillServiceImpl skillServiceImpl;
 
+    private final SkillMapper skillMapper = new SkillMapper();
+
     @Test
     public void testCreateSkill(){
-        SkillDTO skillDTO = new SkillDTO(1L, "Java", "Programming", "Advanced", Date.valueOf("2023-01-01"));
-        Skill skill = SkillMapper.toskill(skillDTO);
+        SkillDTO skillDTO = new SkillDTO(1L, "Java", "Programming", "Advanced", Date.valueOf("2023-01-01"), 1L);
+        User user = new User();
+        Skill skill = skillMapper.toskill(skillDTO, user);
 
         when(skillRepository.save(any(Skill.class))).thenReturn(skill);
 
@@ -47,8 +51,9 @@ public class SkillServiceImplTest {
     public void testGetSkillById(){
         // Arrange
         long skillId = 1L;
-        SkillDTO skillDTO = new SkillDTO(skillId, "Java", "Programming", "Advanced", Date.valueOf("2023-01-01"));
-        Skill skill = SkillMapper.toskill(skillDTO);
+        SkillDTO skillDTO = new SkillDTO(skillId, "Java", "Programming", "Advanced", Date.valueOf("2023-01-01"), 1L);
+        User user = new User();
+        Skill skill = skillMapper.toskill(skillDTO, user);
 
         when(skillRepository.findById(skillId)).thenReturn(java.util.Optional.of(skill));
 
@@ -68,8 +73,9 @@ public class SkillServiceImplTest {
 
     @Test
     public void testGetAllSkills(){
-        SkillDTO skillDTO = new SkillDTO(1L, "Java", "Programming", "Advanced", Date.valueOf("2023-01-01"));
-        Skill skill = SkillMapper.toskill(skillDTO);
+        SkillDTO skillDTO = new SkillDTO(1L, "Java", "Programming", "Advanced", Date.valueOf("2023-01-01"), 1L);
+        User user = new User();
+        Skill skill = skillMapper.toskill(skillDTO, user);
 
         when(skillRepository.findAll()).thenReturn(List.of(skill));
 
@@ -85,8 +91,9 @@ public class SkillServiceImplTest {
     @Test
     public void testUpdateSkill(){
         long skillId = 1L;;
-        SkillDTO skillDTO = new SkillDTO(skillId, "Java", "Programming", "Advanced", Date.valueOf("2023-01-01"));
-        Skill skill = SkillMapper.toskill(skillDTO);
+        SkillDTO skillDTO = new SkillDTO(skillId, "Java", "Programming", "Advanced", Date.valueOf("2023-01-01"), 1L);
+        User user = new User();
+        Skill skill = skillMapper.toskill(skillDTO, user);
 
         when(skillRepository.findById(skillId)).thenReturn(java.util.Optional.of(skill));
         when(skillRepository.save(any(Skill.class))).thenReturn(skill);
@@ -107,8 +114,9 @@ public class SkillServiceImplTest {
     @Test
     public void testDeleteSkill(){
         long skillId = 1L;
-        SkillDTO skillDTO = new SkillDTO(skillId, "Java", "Programming", "Advanced", Date.valueOf("2023-01-01"));
-        Skill skill = SkillMapper.toskill(skillDTO);
+        SkillDTO skillDTO = new SkillDTO(skillId, "Java", "Programming", "Advanced", Date.valueOf("2023-01-01"), 1L);
+        User user = new User();
+        Skill skill = skillMapper.toskill(skillDTO, user);
 
         when(skillRepository.findById(skillId)).thenReturn(java.util.Optional.of(skill));
         doNothing().when(skillRepository).delete(any(Skill.class));
@@ -127,8 +135,9 @@ public class SkillServiceImplTest {
     @Test
     public void testFindByCategory(){
         String category = "Programming";
-        SkillDTO skillDTO = new SkillDTO(1L, "Java", category, "Advanced", Date.valueOf("2023-01-01"));
-        Skill skill = SkillMapper.toskill(skillDTO);
+        SkillDTO skillDTO = new SkillDTO(1L, "Java", category, "Advanced", Date.valueOf("2023-01-01"), 1L);
+        User user = new User();
+        Skill skill = skillMapper.toskill(skillDTO, user);
 
         when(skillRepository.findByCategory(category)).thenReturn(List.of(skill));
 

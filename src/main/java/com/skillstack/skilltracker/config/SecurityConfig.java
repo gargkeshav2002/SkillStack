@@ -1,5 +1,6 @@
 package com.skillstack.skilltracker.config;
 
+import com.skillstack.skilltracker.filter.JwtFilter;
 import com.skillstack.skilltracker.service.impl.UserDetailsServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -15,6 +16,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.Customizer;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
 @EnableWebSecurity
@@ -22,6 +24,8 @@ public class SecurityConfig {
 
      @Autowired
      private UserDetailsServiceImpl userDetailsService;
+     @Autowired
+        private JwtFilter jwtFilter;
 
      @Bean
      public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -31,11 +35,11 @@ public class SecurityConfig {
                   .csrf(AbstractHttpConfigurer::disable)
                   .authorizeHttpRequests(auth -> auth
                           .requestMatchers("/api/v1/skills/**", "/api/v1/users/**").authenticated()
-                          .requestMatchers("/api/v1/admin/all-users").hasRole("ADMIN")
+                          .requestMatchers("/api/v1/admin/all-users", "/api/v1/skills").hasRole("ADMIN")
                           .anyRequest().permitAll()
-                  )
-                  .httpBasic(Customizer.withDefaults())
-                  .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
+                  );
+          http.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
+          http.addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
 
           return http.build();
      }

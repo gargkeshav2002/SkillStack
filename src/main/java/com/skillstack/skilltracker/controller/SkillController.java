@@ -72,7 +72,7 @@ public class SkillController {
         return ResponseEntity.ok(skills);
     }
 
-    @GetMapping("/user/{userId}")
+    @GetMapping("/by-user")
     public ResponseEntity<List<SkillDTO>> getSkillsByUser() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String userName = authentication.getName();

@@ -4,8 +4,12 @@ import com.skillstack.skilltracker.dto.SkillDTO;
 import com.skillstack.skilltracker.exception.ResourceNotFoundException;
 import com.skillstack.skilltracker.mapper.SkillMapper;
 import com.skillstack.skilltracker.model.Skill;
+import com.skillstack.skilltracker.model.User;
 import com.skillstack.skilltracker.repository.SkillRepository;
+import com.skillstack.skilltracker.repository.UserRepository;
 import com.skillstack.skilltracker.service.SkillService;
+import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -14,26 +18,36 @@ import java.util.stream.Collectors;
 
 
 @Service
+@RequiredArgsConstructor
 public class SkillServiceImpl implements SkillService {
     private final SkillRepository skillRepository;
-
-    public SkillServiceImpl(SkillRepository skillRepository) {
-        this.skillRepository = skillRepository;
-    }
+    private final SkillMapper skillMapper;
+    private final UserRepository userRepository;
 
     // Implement the methods from SkillService interface
     @Override
-    public SkillDTO createSkill(SkillDTO skillDTO) {
-        Skill skill = SkillMapper.toskill(skillDTO);
+    @Transactional
+    public SkillDTO createSkill(String userName, SkillDTO skillDTO) {
+        User user = userRepository.findByUsername(userName);
+        if (user == null) {
+            throw new ResourceNotFoundException("User", "username", userName);
+        }
+
+        Skill skill = skillMapper.toskill(skillDTO, user);
         Skill saved = skillRepository.save(skill);
-        return SkillMapper.toskillDTO(saved);
+        if (user.getSkills() == null) {
+            user.setSkills(new ArrayList<>());
+        }
+        user.getSkills().add(saved);
+        userRepository.save(user);
+        return skillMapper.toskillDTO(saved);
     }
 
     @Override
     public SkillDTO getSkillById(long id) {
         Skill skill = skillRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Skill", "id", id));
-        return SkillMapper.toskillDTO(skill);
+        return skillMapper.toskillDTO(skill);
     }
 
     @Override
@@ -41,37 +55,85 @@ public class SkillServiceImpl implements SkillService {
         List<Skill> skills = skillRepository.findAll();
         List<SkillDTO> skillDTOS = new ArrayList<>();
         for (Skill skill : skills) {
-            SkillDTO skillDTO = SkillMapper.toskillDTO(skill);
+            SkillDTO skillDTO = skillMapper.toskillDTO(skill);
             skillDTOS.add(skillDTO);
         }
         return skillDTOS;
     }
 
     @Override
-    public SkillDTO updateSkill(long id, SkillDTO skillDTO) {
-        Skill existingSkill = skillRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Skill not found"));
-        existingSkill.setName(skillDTO.getName());
-        existingSkill.setCategory(skillDTO.getCategory());
-        existingSkill.setLevel(skillDTO.getLevel());
-        existingSkill.setStartedOn(skillDTO.getStartedOn());
-        Skill updatedSkill = skillRepository.save(existingSkill);
-        return SkillMapper.toskillDTO(updatedSkill);
+    public SkillDTO updateSkill(String userName, long id, SkillDTO skillDTO) {
+        User user = userRepository.findByUsername(userName);
+        if (user == null) {
+            throw new ResourceNotFoundException("User", "username", userName);
+        }
+
+        Skill skill = skillRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Skill", "id", id));
+
+        if (!skill.getUser().getUsername().equals(userName)) {
+            throw new SecurityException("You are not authorized to update this skill.");
+        }
+
+        skill.setName(skillDTO.getName());
+        skill.setCategory(skillDTO.getCategory());
+        skill.setLevel(skillDTO.getLevel());
+        skill.setStartedOn(skillDTO.getStartedOn());
+        skill.setUser(user); // Probably redundant, but safe
+
+        Skill updatedSkill = skillRepository.save(skill);
+
+        return skillMapper.toskillDTO(updatedSkill);
     }
 
+    @Transactional
     @Override
-    public boolean deleteSkill(long id) {
+    public boolean deleteSkill(String userName, long id) {
+        User user = userRepository.findByUsername(userName);
+        if (user == null) {
+            throw new ResourceNotFoundException("User", "username", userName);
+        }
+
         Skill skill = skillRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Skill not found"));
-        skillRepository.delete(skill);
+
+        if (!skill.getUser().getUsername().equals(userName)) {
+            throw new SecurityException("You are not authorized to delete this skill.");
+        }
+
+        // ✅ Remove from the user's skill list
+        user.getSkills().removeIf(s -> s.getId() == id);  // important line!
+
+        userRepository.save(user); // persist the orphan removal
+
         return !skillRepository.existsById(id);
     }
 
+
     @Override
-    public List<SkillDTO> findByCategory(String category) {
-        List<Skill> skills = skillRepository.findByCategory(category);
+    public List<SkillDTO> findByCategory(String userName, String category) {
+        User user = userRepository.findByUsername(userName);
+        if (user == null) {
+            throw new ResourceNotFoundException("User", "username", userName);
+        }
+        List<Skill> skills = skillRepository.findByCategoryAndUserId(category, user.getId());
+        if (skills.isEmpty()) {
+            throw new ResourceNotFoundException("Skill", "category", category);
+        }
         return skills.stream()
-                .map(SkillMapper::toskillDTO)
+                .map(skillMapper::toskillDTO)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<SkillDTO> getSkillsByUser(String userName) {
+        User user = userRepository.findByUsername(userName);
+        if (user == null) {
+            throw new ResourceNotFoundException("User", "username", userName);
+        }
+        List<Skill> skills = skillRepository.findByUserId(user.getId());
+        return skills.stream()
+                .map(skillMapper::toskillDTO)
                 .collect(Collectors.toList());
     }
 }

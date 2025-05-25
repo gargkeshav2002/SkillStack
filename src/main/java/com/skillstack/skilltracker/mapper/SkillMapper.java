@@ -2,9 +2,12 @@ package com.skillstack.skilltracker.mapper;
 
 import com.skillstack.skilltracker.dto.SkillDTO;
 import com.skillstack.skilltracker.model.Skill;
+import com.skillstack.skilltracker.model.User;
+import org.springframework.stereotype.Component;
 
+@Component
 public class SkillMapper {
-    public static SkillDTO toskillDTO(Skill skill) {
+    public SkillDTO toskillDTO(Skill skill) {
         if(skill == null) {
             return null;
         }
@@ -13,10 +16,11 @@ public class SkillMapper {
                 skill.getName(),
                 skill.getCategory(),
                 skill.getLevel(),
-                skill.getStartedOn());
+                skill.getStartedOn(),
+                skill.getUser() != null ? skill.getUser().getId() : null);
     }
 
-    public static Skill toskill(SkillDTO skillDTO) {
+    public Skill toskill(SkillDTO skillDTO, User user) {
         if(skillDTO == null) {
             return null;
         }
@@ -25,6 +29,7 @@ public class SkillMapper {
                 skillDTO.getName(),
                 skillDTO.getCategory(),
                 skillDTO.getLevel(),
-                skillDTO.getStartedOn());
+                skillDTO.getStartedOn(),
+                user);
     }
 }

@@ -7,6 +7,8 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -22,7 +24,9 @@ public class SkillController {
     @PostMapping
     @Operation(summary = "Create a new skill")
     public ResponseEntity<SkillDTO> createSkill(@RequestBody SkillDTO skillDTO){
-        SkillDTO created = skillService.createSkill(skillDTO);
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String userName = authentication.getName();
+        SkillDTO created = skillService.createSkill(userName, skillDTO);
         return ResponseEntity.ok(created);
     }
 
@@ -34,19 +38,25 @@ public class SkillController {
 
     @GetMapping
     public ResponseEntity<List<SkillDTO>> getAllSkills(){
-        List<SkillDTO> skillDTOS = skillService.getAllSkills();
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String userName = authentication.getName();
+        List<SkillDTO> skillDTOS = skillService.getAllSkills(   );
         return ResponseEntity.ok(skillDTOS);
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<SkillDTO> updateSkill(@PathVariable long id, @RequestBody SkillDTO skillDTO){
-        SkillDTO updatedSkill = skillService.updateSkill(id, skillDTO);
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String userName = authentication.getName();
+        SkillDTO updatedSkill = skillService.updateSkill(userName, id, skillDTO);
         return ResponseEntity.ok(updatedSkill);
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteSkill(@PathVariable long id){
-        boolean deleted = skillService.deleteSkill(id);
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String userName = authentication.getName();
+        boolean deleted = skillService.deleteSkill(userName, id);
         if (deleted) {
             return ResponseEntity.noContent().build();
         } else {
@@ -56,7 +66,18 @@ public class SkillController {
 
     @GetMapping("/category/{category}")
     public ResponseEntity<List<SkillDTO>> findByCategory(@PathVariable String category){
-        List<SkillDTO> skills = skillService.findByCategory(category);
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String userName = authentication.getName();
+        List<SkillDTO> skills = skillService.findByCategory(userName, category);
         return ResponseEntity.ok(skills);
     }
+
+    @GetMapping("/by-user")
+    public ResponseEntity<List<SkillDTO>> getSkillsByUser() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String userName = authentication.getName();
+        List<SkillDTO> skills = skillService.getSkillsByUser(userName);
+        return ResponseEntity.ok(skills);
+    }
+
 }

@@ -10,6 +10,7 @@ import com.skillstack.skilltracker.repository.UserRepository;
 import com.skillstack.skilltracker.service.SkillService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -19,6 +20,7 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class SkillServiceImpl implements SkillService {
     private final SkillRepository skillRepository;
     private final SkillMapper skillMapper;
@@ -28,19 +30,24 @@ public class SkillServiceImpl implements SkillService {
     @Override
     @Transactional
     public SkillDTO createSkill(String userName, SkillDTO skillDTO) {
-        User user = userRepository.findByUsername(userName);
-        if (user == null) {
-            throw new ResourceNotFoundException("User", "username", userName);
-        }
+        try{
+            User user = userRepository.findByUsername(userName);
+            if (user == null) {
+                throw new ResourceNotFoundException("User", "username", userName);
+            }
 
-        Skill skill = skillMapper.toskill(skillDTO, user);
-        Skill saved = skillRepository.save(skill);
-        if (user.getSkills() == null) {
-            user.setSkills(new ArrayList<>());
+            Skill skill = skillMapper.toskill(skillDTO, user);
+            Skill saved = skillRepository.save(skill);
+            if (user.getSkills() == null) {
+                user.setSkills(new ArrayList<>());
+            }
+            user.getSkills().add(saved);
+            userRepository.save(user);
+            return skillMapper.toskillDTO(saved);
+        }catch (Exception e) {
+            log.error("Error creating skill: {}", e.getMessage());
+            throw new RuntimeException("Error creating skill: " + e.getMessage(), e);
         }
-        user.getSkills().add(saved);
-        userRepository.save(user);
-        return skillMapper.toskillDTO(saved);
     }
 
     @Override

@@ -1,13 +1,23 @@
-# SkillStack
-🏗️ Project Name: SkillStack — Personal Growth Tracker
+# 🛠️ SkillTracker
 
-What it is:
-A full-stack web app where users can log, manage, and track their learning, progress, and goals across different skills (like DSA, Cloud, System Design, etc.)
+A secure, extensible Spring Boot backend for managing users and their skills with JWT authentication, role-based access control, and modular architecture.
 
-Why this is future-proof:
+## 🚀 Features
 
-It's scalable (can expand to teams, AI suggestions, gamification, etc.)
+- ✅ **User-Skill CRUD APIs** – Users can create, view, update, and delete their own skills.
+- 🔐 **JWT Authentication & Refresh Token Flow** – Secure sessions with token renewal support.
+- 🧑‍💻 **Role-Based Authorization** – Admins have full access; users manage their own data.
+- 🧱 **Layered Architecture** – Entity-DTO separation using **MapStruct**, clean service/repo layers.
+- 📊 **API Documentation** – Integrated **Swagger/OpenAPI** for seamless testing and visibility.
+- 🧪 **Unit & Integration Testing** – JUnit, Mockito used for robust backend verification.
+- 📜 **Structured Logging** – Configured with `logback.xml` for actionable logs.
+- 🧰 **Exception Handling** – Centralized error management with custom exceptions.
 
-It’s personal (every dev wants a tool to track growth)
+## 📦 Tech Stack
 
-Helps showcase multiple skills: CRUD, Auth, Roles, Analytics, Testing, Docs, and more
+- **Java 17**, **Spring Boot**
+- **Spring Security**, **JWT**, **RBAC**
+- **PostgreSQL**, **JPA/Hibernate**
+- **MapStruct**, **Swagger/OpenAPI**
+- **JUnit**, **Mockito**, **Lombok**
+- **Maven**, **Logback**
